@@ -1,4 +1,7 @@
 <?php
+echo session_id();
+session_start();
+
 // Register the autoloader
 spl_autoload_register(function($classname) {
     include "$classname.php";
@@ -13,7 +16,7 @@ if (isset($_GET["command"]))
 // a valid session (they didn't get here from the login page),
 // so we should send them over to log in first before doing
 // anything else!
-if (!isset($_COOKIE["email"])) {
+if (!isset($_SESSION["email"])) {
     // they need to see the login
     $command = "login";
 }

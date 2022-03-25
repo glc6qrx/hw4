@@ -13,25 +13,24 @@
     <body>
         <div class="container" style="margin-top: 15px;">
             <div class="row col-xs-8">
-                <h1>CS4640 Extreme Wordle Gayme</h1>
-                <h3>Hello <?=$user["name"]?>! Guesses: <?=$user["guesses"]?></h3>
+                <h1>CS4640 Extreme Wordle Game</h1>
+                <h3>Hello <?=$user["name"]?>! Guesses: <?=$user["guess_count"]?></h3>
             </div>
             <div class="row">
                 <div class="col-xs-8 mx-auto">
-                <form action="?command=wordle2" method="post">
+                <form action="?command=wordle" method="post">
                     <div class="h-100 p-5 bg-light border rounded-3">
                     <h2>Wordle</h2>
-                    <p><?=$user["word"]?></p>
+                    <p><?=$user["hidden_word"]?></p>
                     
                     <?php 
-                        foreach($user["previous"] as $guess) {
+                        foreach($user["previous_guesses"] as $guess) {
                             echo $guess["guess"], " Length: ", $guess["length"], " guess word size: ", $guess["longshort"], " Number of characters in the correct position: ", $guess["correctPos"], " Number of Characters contained in correct word (duplicates not included): ", $guess["containsCount"], '<br>';
                         } 
                     ?>
                    
                     <input type="hidden" name="questionid" value="<?=$question["id"]?>"/>
                     </div>
-                    <?=$message?>
                     <div class="h-10 p-5 mb-3">
                         <input type="text" class="form-control" id="answer" name="answer" placeholder="Type your word here">
                     </div>

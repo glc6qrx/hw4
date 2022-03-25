@@ -1,25 +1,20 @@
 <?php
-session_start();
 class WordGameController {
 
     private $command;
 
     
     public function __construct($command) {
-
         $this->command = $command;
     }
 
     public function run() {
         switch($this->command) {
             case "wordle":
-                $this->wordle(True);
-                break;
-            case "wordle2":
-                $this->wordle(False);
+                $this->wordle();
                 break;
             case "logout":
-                $this->destroyCookies();
+                $this->destroySession();
             case "login":
             default:
                 $this->login();
@@ -28,38 +23,31 @@ class WordGameController {
     }
 
     // Clear all the cookies that we've set
-    private function destroyCookies() {          
-        unset($_SESSION["name"]);
-        unset($_SESSION["email"]);
-        unset($_SESSION["guesses"]);
-        unset($_SESSION["word"]);
-        unset($_SESSION["previous"]);
+    private function destroySession() {          
         session_destroy();
         header("Location: ?command=login");
-        
     }
 
     // Display the login page (and handle login logic)
-    public function login() {
+    public function login() {        
         if (isset($_POST["email"]) && !empty($_POST["email"])) { /// validate the email coming in
             $_SESSION["name"] = $_POST["name"];
             $_SESSION["email"] = $_POST["email"];
-            $_SESSION["guesses"] = 0;
-            $_SESSION["word"] = $this->loadWord();
-            $_SESSION["previous"] = [];
+            $_SESSION["guess_count"] = 0;
+            $_SESSION["hidden_word"] = $this->loadWord();
+            $_SESSION["previous_guesses"] = [];
             header("Location: ?command=wordle");
             return;
         }
-
         include "login.php";
     }
     
 
     // Load a question from the API
     private function loadWord() {
-        //$wordData = json_decode(
-        //    file_get_contents("https://random-word-api.herokuapp.com/word")
-        //   , true);
+        $wordData = json_decode(
+            file_get_contents("https://www.cs.virginia.edu/~jh2jf/courses/cs4640/spring2022/wordlist.txt"), 
+            true);
         $input = array("Charemsa","MindGoblin","Candice", "Rhydon", "Rammus", "Stigma", "Bofadese", "Dragon", "Sugondese", "Gulpin", "Sawcon", "Wilma", "WonaPound", "PennyTrading", "Nuddinyore", "Shogun","Lee Gandhi","PlantTulips", "Sawk", "Wendy",);
         $wordData = $input[array_rand($input)];
         
@@ -72,149 +60,88 @@ class WordGameController {
     }
 
     
-    public function wordle($setup) {
+    public function wordle() {
         // set user information for the page from the cookie
-        $data = $_SESSION['previous'];
+        $data = $_SESSION["previous_guesses"];
         $user = [
             "name" => $_SESSION["name"],
             "email" => $_SESSION["email"],
-            "guesses" => $_SESSION["guesses"],
-            "word" => $_SESSION["word"],
-            "previous" => $_SESSION["previous"]
+            "guess_count" => $_SESSION["guess_count"],
+            "hidden_word" => strtolower($_SESSION["hidden_word"]),
+            "previous_guesses" => $_SESSION["previous_guesses"]
         ];
-
-        // load the question
-        //if($setup){
-        //    echo "load word";
-        //    $this->question = $this->loadWord();
-        //}
-        //$question = $this->question;
-
-        //echo "OUTSIDE";
-        //echo $question;
-        
-        // if the user submitted an answer, check it
-
         // update the question information in cookies
-        setcookie("answer", $user["word"], time() + 3600);
-
+        // setcookie("answer", $user["hidden_word"], time() + 3600);
         if (isset($_POST["answer"])) {
             //Array to store guess, length, how many characters correct etc.
             $guessData = [];
-
-
-
-            echo "INSIDE";
-            $answer = $_POST["answer"];
+            // echo "INSIDE";
+            $answer = strtolower($_POST["answer"]);
             
+            $user["guess_count"] += 1; 
+            $_SESSION["guess_count"] += 1;
             
-            $user["guesses"] += 1; 
-            $_SESSION["guesses"] += 1;
-
-            
-            
-            
-
-            
-
-            if ( $user["word"] == $answer) {
+            if ($user["hidden_word"] === $answer) {
                 // user answered correctly -- perhaps we should also be better about how we
                 // verify their answers, perhaps use strtolower() to compare lower case only.
-                
-                $guesses = $_SESSION["guesses"] + 1;
+                $guesses = $user["guess_count"];
                 $message = "<div class='alert alert-success'><b>$answer</b> was correct! It took you $guesses guesses!</div>";
-
-                // Update the score
-                 
-
-                // Update the cookie: won't be available until next page load (stored on client)
-                
-
-               
-                
+                echo $message;
             } else { 
                 
-                if(strlen($_POST["answer"]) == strlen($user["word"])){
+                if(strlen($_POST["answer"]) === strlen($user["hidden_word"])){
                     $guessData["longshort"] = "just right";
                 }
-                else if(strlen($_POST["answer"]) < strlen($user["word"])){
+                else if(strlen($_POST["answer"]) < strlen($user["hidden_word"])){
                     $guessData["longshort"] = "too short";
                 }
                 else{
                     $guessData["longshort"] = "too long";
                 }
-
-                $word = $user["word"];
-
-                $answerFreq = array();
-                $wordFreq = array();
-
+                $word = $user["hidden_word"];
+                $answer_char_freq = array();
+                $hidden_word_char_freq = array();
                 $higher = max(strlen($answer), strlen($word));
                 
-
                 $correctPositions = 0;
                 $containsCount = 0;
                 
                 for($i = 0; $i<=$higher;$i++){
                     if($i < strlen($answer)){
-                        if(array_key_exists($answer[$i], $answerFreq)){
-                            $answerFreq[$answer[$i]] = $answerFreq[$answer[$i]] + 1;
-                        }
-                        else{
-                            $answerFreq[$answer[$i]] = 1;
-                        }
+                        $answer_char_freq[$answer[$i]] = array_key_exists($answer[$i], $answer_char_freq) ? $answer_char_freq[$answer[$i]] + 1 : 1;
                     }
                     if($i < strlen($word)){
-                        if(array_key_exists($word[$i], $wordFreq)){
-                            $wordFreq[$word[$i]] = $wordFreq[$word[$i]] + 1;
-                        }
-                        else{
-                            $wordFreq[$word[$i]] = 1;
-                        }
+                        $hidden_word_char_freq[$word[$i]] = array_key_exists($word[$i], $hidden_word_char_freq) ? $hidden_word_char_freq[$word[$i]] + 1 : 1;
                     }
                     if($i < strlen($answer) && ($i < strlen($word))){
-                        if($word[$i] == $answer[$i]){
+                        if($word[$i] === $answer[$i]){
                             $correctPositions += 1;
                         }
                     }
                 }
-                
-                
-                
-                foreach ($answerFreq as $key => $value) {
-                    if(array_key_exists($key, $wordFreq)){
-                        if($wordFreq[$key] != 0){
+                foreach ($answer_char_freq as $key => $value) {
+                    if(array_key_exists($key, $hidden_word_char_freq)){
+                        if($hidden_word_char_freq[$key] != 0){
                             $containsCount += 1;
-                            $wordFreq[$key] = $wordFreq[$key] - 1;
+                            $hidden_word_char_freq[$key] = $hidden_word_char_freq[$key] - 1;
                         }
                     }
                 }
-
                 
-
                 $message = "<div class='alert alert-danger'><b>$answer</b> was incorrect!</div>";
+                echo $message;
                 
+                $guessData["guess"] = $_POST["answer"];
+                $guessData["length"] = strlen($_POST["answer"]);
+                $guessData["correctPos"] = $correctPositions;
+                $guessData["containsCount"] = $containsCount;
+    
+                $user["previous_guesses"][] = $guessData;
+                $data[] = $guessData;
+                $_SESSION["previous_guesses"] = $data;
+                $previousGuesses = $_SESSION["previous_guesses"];
             }
-
-            $guessData["guess"] = $_POST["answer"];
-            $guessData["length"] = strlen($_POST["answer"]);
-            $guessData["correctPos"] = $correctPositions;
-            $guessData["containsCount"] = $containsCount;
-
-            $user["previous"][] = $guessData;
-            $data[] = $guessData;
-            $_SESSION["previous"] = $data;
-            $previousGuesses = $_SESSION['previous'];
-
-
-
         }
-       
-
         include("wordle.php");
     }
-
-   // public function wordle() {
-    
-    //}
 }
