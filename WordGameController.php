@@ -1,10 +1,12 @@
 <?php
+session_start();
 class WordGameController {
 
     private $command;
 
     
     public function __construct($command) {
+
         $this->command = $command;
     }
 
@@ -27,22 +29,24 @@ class WordGameController {
 
     // Clear all the cookies that we've set
     private function destroyCookies() {          
-        setcookie("correct", "", time() - 3600);
-        setcookie("name", "", time() - 3600);
-        setcookie("email", "", time() - 3600);
-        setcookie("guesses", "", time() - 3600);
-        setcookie("word", "", time() - 3600);
-        setcookie("previous", "", time() - 3600);
+        unset($_SESSION["name"]);
+        unset($_SESSION["email"]);
+        unset($_SESSION["guesses"]);
+        unset($_SESSION["word"]);
+        unset($_SESSION["previous"]);
+        session_destroy();
+        header("Location: ?command=login");
+        
     }
 
     // Display the login page (and handle login logic)
     public function login() {
         if (isset($_POST["email"]) && !empty($_POST["email"])) { /// validate the email coming in
-            setcookie("name", $_POST["name"], time() + 3600);
-            setcookie("email", $_POST["email"], time() + 3600);
-            setcookie("guesses", 0, time() + 3600);
-            setcookie("word", $this->loadWord(), time() + 3600);
-            setcookie("previous", json_encode([]), time() + 3600);
+            $_SESSION["name"] = $_POST["name"];
+            $_SESSION["email"] = $_POST["email"];
+            $_SESSION["guesses"] = 0;
+            $_SESSION["word"] = $this->loadWord();
+            $_SESSION["previous"] = [];
             header("Location: ?command=wordle");
             return;
         }
@@ -70,13 +74,13 @@ class WordGameController {
     
     public function wordle($setup) {
         // set user information for the page from the cookie
-        $data = json_decode($_COOKIE['previous'], true);
+        $data = $_SESSION['previous'];
         $user = [
-            "name" => $_COOKIE["name"],
-            "email" => $_COOKIE["email"],
-            "guesses" => $_COOKIE["guesses"],
-            "word" => $_COOKIE["word"],
-            "previous" => $data
+            "name" => $_SESSION["name"],
+            "email" => $_SESSION["email"],
+            "guesses" => $_SESSION["guesses"],
+            "word" => $_SESSION["word"],
+            "previous" => $_SESSION["previous"]
         ];
 
         // load the question
@@ -105,7 +109,7 @@ class WordGameController {
             
             
             $user["guesses"] += 1; 
-            setcookie("guesses", $_COOKIE["guesses"] + 1, time() + 3600);
+            $_SESSION["guesses"] += 1;
 
             
             
@@ -117,7 +121,7 @@ class WordGameController {
                 // user answered correctly -- perhaps we should also be better about how we
                 // verify their answers, perhaps use strtolower() to compare lower case only.
                 
-                $guesses = $_COOKIE["guesses"] + 1;
+                $guesses = $_SESSION["guesses"] + 1;
                 $message = "<div class='alert alert-success'><b>$answer</b> was correct! It took you $guesses guesses!</div>";
 
                 // Update the score
@@ -125,7 +129,6 @@ class WordGameController {
 
                 // Update the cookie: won't be available until next page load (stored on client)
                 
-                setcookie("correct", "", time() - 3600);
 
                
                 
@@ -141,8 +144,51 @@ class WordGameController {
                     $guessData["longshort"] = "too long";
                 }
 
-                $answerArr = str_split($answer);
+                $word = $user["word"];
+
+                $answerFreq = array();
+                $wordFreq = array();
+
+                $higher = max(strlen($answer), strlen($word));
+                
+
+                $correctPositions = 0;
                 $containsCount = 0;
+                
+                for($i = 0; $i<=$higher;$i++){
+                    if($i < strlen($answer)){
+                        if(array_key_exists($answer[$i], $answerFreq)){
+                            $answerFreq[$answer[$i]] = $answerFreq[$answer[$i]] + 1;
+                        }
+                        else{
+                            $answerFreq[$answer[$i]] = 1;
+                        }
+                    }
+                    if($i < strlen($word)){
+                        if(array_key_exists($word[$i], $wordFreq)){
+                            $wordFreq[$word[$i]] = $wordFreq[$word[$i]] + 1;
+                        }
+                        else{
+                            $wordFreq[$word[$i]] = 1;
+                        }
+                    }
+                    if($i < strlen($answer) && ($i < strlen($word))){
+                        if($word[$i] == $answer[$i]){
+                            $correctPositions += 1;
+                        }
+                    }
+                }
+                
+                
+                
+                foreach ($answerFreq as $key => $value) {
+                    if(array_key_exists($key, $wordFreq)){
+                        if($wordFreq[$key] != 0){
+                            $containsCount += 1;
+                            $wordFreq[$key] = $wordFreq[$key] - 1;
+                        }
+                    }
+                }
 
                 
 
@@ -152,15 +198,17 @@ class WordGameController {
 
             $guessData["guess"] = $_POST["answer"];
             $guessData["length"] = strlen($_POST["answer"]);
-            
+            $guessData["correctPos"] = $correctPositions;
+            $guessData["containsCount"] = $containsCount;
 
             $user["previous"][] = $guessData;
             $data[] = $guessData;
-            setcookie("previous", json_encode($data), time() + 3600);
-            $previousGuesses = json_decode($_COOKIE['previous'], true);
-        }
-       
+            $_SESSION["previous"] = $data;
+            $previousGuesses = $_SESSION['previous'];
 
+
+
+        }
        
 
         include("wordle.php");

@@ -1,3 +1,5 @@
+
+
 <!DOCTYPE html>
 <html>
     <head>
@@ -23,7 +25,7 @@
                     
                     <?php 
                         foreach($user["previous"] as $guess) {
-                            echo $guess["guess"], " Length: ", $guess["length"], " guess word size: ", $guess["longshort"],'<br>';
+                            echo $guess["guess"], " Length: ", $guess["length"], " guess word size: ", $guess["longshort"], " Number of characters in the correct position: ", $guess["correctPos"], " Number of Characters contained in correct word (duplicates not included): ", $guess["containsCount"], '<br>';
                         } 
                     ?>
                    
