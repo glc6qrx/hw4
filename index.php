@@ -1,3 +1,9 @@
+<!-- 
+    SOURCES:
+    https://www.php.net/manual/en/function.explode.php
+    https://www.php.net/manual/en/function.file-get-contents.php 
+-->
+
 <?php
 echo session_id();
 session_start();
