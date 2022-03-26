@@ -25,7 +25,9 @@
                     
                     <?php 
                         foreach($user["previous_guesses"] as $guess) {
-                            echo $guess["guess"], " Length: ", $guess["length"], " guess word size: ", $guess["longshort"], " Number of characters in the correct position: ", $guess["correctPos"], " Number of Characters contained in correct word (duplicates not included): ", $guess["containsCount"], '<br>';
+                            echo "<h2>", $guess["guess"], "</h2>";
+                            echo "<ul>
+                                    <li>Length: ", $guess["length"], " guess word size: ", $guess["longshort"], " Number of characters in the correct position: ", $guess["correctPos"], " Number of Characters contained in correct word (duplicates not included): ", $guess["containsCount"], '<br>';
                         } 
                     ?>
                    

@@ -45,18 +45,16 @@ class WordGameController {
 
     // Load a question from the API
     private function loadWord() {
-        $wordData = json_decode(
-            file_get_contents("https://www.cs.virginia.edu/~jh2jf/courses/cs4640/spring2022/wordlist.txt"), 
-            true);
-        $input = array("Charemsa","MindGoblin","Candice", "Rhydon", "Rammus", "Stigma", "Bofadese", "Dragon", "Sugondese", "Gulpin", "Sawcon", "Wilma", "WonaPound", "PennyTrading", "Nuddinyore", "Shogun","Lee Gandhi","PlantTulips", "Sawk", "Wendy",);
-        $wordData = $input[array_rand($input)];
+        $wordData = explode("\n", file_get_contents("https://www.cs.virginia.edu/~jh2jf/courses/cs4640/spring2022/wordlist.txt"));
+        // $input = array("Charemsa","MindGoblin","Candice", "Rhydon", "Rammus", "Stigma", "Bofadese", "Dragon", "Sugondese", "Gulpin", "Sawcon", "Wilma", "WonaPound", "PennyTrading", "Nuddinyore", "Shogun","Lee Gandhi","PlantTulips", "Sawk", "Wendy",);
+        $word = $wordData[array_rand($wordData)];
         
 
         
         // Return the question
         
         //return implode('', $wordData);
-        return $wordData;
+        return $word;
     }
 
     
