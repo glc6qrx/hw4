@@ -14,33 +14,37 @@
         <div class="container" style="margin-top: 15px;">
             <div class="row col-xs-8">
                 <h1>CS4640 Extreme Wordle Game</h1>
-                <h3>Hello <?=$user["name"]?>! Guesses: <?=$user["guess_count"]?></h3>
+                <h3>Hello <?=ucfirst($user["name"])?>! Guesses: <?=$user["guess_count"]?></h3>
             </div>
             <div class="row">
                 <div class="col-xs-8 mx-auto">
-                <form action="?command=wordle" method="post">
-                    <div class="h-100 p-5 bg-light border rounded-3">
-                    <h2>Wordle</h2>
-                    <p><?=$user["hidden_word"]?></p>
+                <form action="?command=wordle" method="post" class="row">
+                    <span class="h-10 p-5 mb-1 col-md-10">
+                        <input type="text" class="form-control" id="answer" name="answer" placeholder="Type your word here">
+                    </span>
+                    <span class="text-center col-md-2 my-auto">                
+                    <button type="submit" class="btn btn-primary col-12">Submit</button>
+                    <a href="?command=logout" class="btn btn-danger col-12">End Game</a>
+                    </span>                    
+                </form>
+                <div class="p-5 bg-light border rounded-3">
+                    <h2>Previous Guesses</h2>
+                    <!-- <p class="text-uppercase"><?=$user["hidden_word"]?></p> -->
                     
                     <?php 
                         foreach($user["previous_guesses"] as $guess) {
-                            echo "<h2>", $guess["guess"], "</h2>";
-                            echo "<ul>
-                                    <li>Length: ", $guess["length"], " guess word size: ", $guess["longshort"], " Number of characters in the correct position: ", $guess["correctPos"], " Number of Characters contained in correct word (duplicates not included): ", $guess["containsCount"], '<br>';
+                            echo "<h2 class='text-capitalize'>", $guess["guess"], "</h2>";
+                            echo "<ul class = 'text-uppercase'>
+                                    <li>Length: ", $guess["length"], "</li>
+                                    <li>", $guess["longshort"], " in comparison</li>
+                                    <li>Number of characters in the correct position: ", $guess["correctPos"], "</li>",
+                                    "<li>Number of Characters contained in correct word (duplicates not included): ", $guess["containsCount"], '</li>
+                                    </ul><br>';
                         } 
                     ?>
                    
                     <input type="hidden" name="questionid" value="<?=$question["id"]?>"/>
                     </div>
-                    <div class="h-10 p-5 mb-3">
-                        <input type="text" class="form-control" id="answer" name="answer" placeholder="Type your word here">
-                    </div>
-                    <div class="text-center">                
-                    <button type="submit" class="btn btn-primary">Submit</button>
-                    <a href="?command=logout" class="btn btn-danger">End Game</a>
-                    </div>
-                </form>
                 </div>
             </div>
         </div>
