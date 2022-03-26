@@ -15,6 +15,10 @@ class WordGameController {
                 break;
             case "logout":
                 $this->destroySession();
+                break;
+            case "endgame":
+                $this->endgame();
+                break;
             case "login":
             default:
                 $this->login();
@@ -49,11 +53,6 @@ class WordGameController {
         // $input = array("Charemsa","MindGoblin","Candice", "Rhydon", "Rammus", "Stigma", "Bofadese", "Dragon", "Sugondese", "Gulpin", "Sawcon", "Wilma", "WonaPound", "PennyTrading", "Nuddinyore", "Shogun","Lee Gandhi","PlantTulips", "Sawk", "Wendy",);
         $word = $wordData[array_rand($wordData)];
         
-
-        
-        // Return the question
-        
-        //return implode('', $wordData);
         return $word;
     }
 
@@ -141,5 +140,18 @@ class WordGameController {
             }
         }
         include("wordle.php");
+    }
+
+    public function endgame() {
+        $user = [
+            "name" => $_SESSION["name"],
+            "email" => $_SESSION["email"],
+            "guess_count" => $_SESSION["guess_count"],
+            "hidden_word" => strtolower($_SESSION["hidden_word"]),
+            "previous_guesses" => $_SESSION["previous_guesses"]
+        ];
+        $answer = $_SESSION["hidden_word"];
+        $guesses = $_SESSION["guess_count"];
+        include("endgame.php");
     }
 }

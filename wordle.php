@@ -18,13 +18,12 @@
             </div>
             <div class="row">
                 <div class="col-xs-8 mx-auto">
-                <form action="?command=wordle" method="post" class="row">
-                    <span class="h-10 p-5 mb-1 col-md-10">
+                <form action="?command=wordle" method="post" class="row p-3">
+                    <span class="h-10 my-auto col-md-10">
                         <input type="text" class="form-control" id="answer" name="answer" placeholder="Type your word here">
                     </span>
                     <span class="text-center col-md-2 my-auto">                
-                    <button type="submit" class="btn btn-primary col-12">Submit</button>
-                    <a href="?command=logout" class="btn btn-danger col-12">End Game</a>
+                        <button type="submit" class="btn btn-primary col-12">Submit</button>
                     </span>                    
                 </form>
                 <div class="p-5 bg-light border rounded-3">
@@ -45,6 +44,7 @@
                    
                     <input type="hidden" name="questionid" value="<?=$question["id"]?>"/>
                     </div>
+                    <a href="?command=endgame" class="mt-3 btn btn-danger col-12">End Game</a>
                 </div>
             </div>
         </div>
