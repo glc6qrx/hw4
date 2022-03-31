@@ -40,6 +40,7 @@ class WordGameController {
             $_SESSION["guess_count"] = 0;
             $_SESSION["hidden_word"] = $this->loadWord();
             $_SESSION["previous_guesses"] = [];
+            setcookie("test", "hello test", time() + 3600);
             header("Location: ?command=wordle");
             return;
         }
@@ -59,6 +60,9 @@ class WordGameController {
     
     public function wordle() {
         // set user information for the page from the cookie
+        setcookie("test", "", time() - 3600);
+        echo $_COOKIE['test'];
+
         $data = $_SESSION["previous_guesses"];
         $user = [
             "name" => $_SESSION["name"],
@@ -83,7 +87,9 @@ class WordGameController {
                 // verify their answers, perhaps use strtolower() to compare lower case only.
                 $guesses = $user["guess_count"];
                 $message = "<div class='alert alert-success'><b>$answer</b> was correct! It took you $guesses guesses!</div>";
+                
                 echo $message;
+                header("Location: ?command=endgame");
             } else { 
                 
                 if(strlen($_POST["answer"]) === strlen($user["hidden_word"])){

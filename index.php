@@ -5,7 +5,7 @@
 -->
 
 <?php
-echo session_id();
+// echo session_id();
 session_start();
 
 // Register the autoloader
